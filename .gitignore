@@ -1,17 +1,17 @@
-# Dependencias de Node.js
+# Node.js dependencies
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json # Puede ser opcional, mira la nota abajo
+package-lock.json # Can be optional, see note below
 
-# Archivos de Serverless
+# Serverless framework files
 .serverless/
-.webpack/           # Común si usas serverless-webpack
-.build/             # Otro posible directorio de build de Serverless
-.serverless-offline/ # Si usas serverless-offline
+.webpack/           # Common if you're using serverless-webpack
+.build/             # Another possible Serverless build directory
+.serverless-offline/ # If you're using serverless-offline
 
-# Entornos virtuales de Python
+# Python virtual environments
 .venv/
 env/
 venv/
@@ -19,7 +19,7 @@ ENV/
 env.bak/
 venv.bak/
 
-# Archivos de caché y compilación de Python
+# Python compiled files and cache
 __pycache__/
 *.pyc
 *.pyo
@@ -35,45 +35,45 @@ sdist/
 var/
 *.egg
 
-# Archivos de configuración de entorno (variables locales)
+# Environment configuration files (local variables)
 .env
-.env.example # A menudo se mantiene para mostrar el formato, pero si contiene secretos, ignóralo.
+.env.example # Often kept to show format, but ignore if it contains secrets.
 
-# Específico de Kiro (si Kiro genera carpetas temporales o de configuración)
-.kiro/              # Carpeta de configuración interna de Kiro (ejemplo)
-kiro_temp/          # Directorios temporales que Kiro podría crear
-*.kiro_config       # Ejemplo de archivos de configuración local de Kiro
+# Kiro specific (if Kiro generates specific temporary folders or config files)
+.kiro/              # Kiro's internal configuration folder (example)
+kiro_temp/          # Any temporary directories Kiro might create
+*.kiro_config       # Example if Kiro generates local config files
 
-# Específico de AWS
-.aws/               # ¡Contiene credenciales de AWS, muy importante ignorar!
-*.pem               # Archivos de clave privada
-*.key               # Otros archivos de clave
-aws-exports.js      # Configuración de Amplify (si se usa)
-# Archivos temporales de credenciales o logs de AWS si Kiro los generara
+# AWS specific
+.aws/               # Contains AWS credentials (crucial to ignore!)
+*.pem               # Private key files
+*.key               # Other key files
+aws-exports.js      # Amplify config (if used)
+# Temporary AWS credential files or logs if Kiro were to generate them
 
-# Archivos de Editor e IDE
-.idea/              # IDEs de JetBrains (PyCharm, IntelliJ)
-.vscode/            # Configuración de VS Code (opcional, a veces útil para compartir ajustes de equipo)
+# Editor and IDE specific
+.idea/              # JetBrains IDEs (PyCharm, IntelliJ)
+.vscode/            # VS Code settings (optional, sometimes useful for team settings)
 *.sublime-project
 *.sublime-workspace
 
-# Archivos generados por el sistema operativo
+# OS generated files
 .DS_Store           # macOS
 .Trashes            # macOS
 Thumbs.db           # Windows
 ehthumbs.db         # Windows
 
-# Logs y bases de datos locales
-*.log               # Archivos de log
-*.sqlite3           # Bases de datos SQLite (si se usan localmente)
-*.db                # Otros archivos de base de datos
+# Logs and local databases
+*.log               # Log files
+*.sqlite3           # SQLite databases (if used locally)
+*.db                # Other database files
 
-# Datos locales / Salidas generadas
-data/               # Si procesas archivos de datos locales grandes que no deben ser versionados
-results/            # Para resultados de pruebas locales, archivos de salida no parte del código fuente
-temp/               # Archivos temporales
-uploads/            # Si tu aplicación maneja subidas de archivos localmente
+# Local data / Generated outputs
+data/               # For large local data files that shouldn't be committed
+results/            # For local test results, output files not part of source code
+temp/               # Temporary files
+uploads/            # If your application handles local file uploads
 
-# Archivos de despliegue y empaquetado
+# Deployment and packaging files
 *.zip
 *.tar.gz
