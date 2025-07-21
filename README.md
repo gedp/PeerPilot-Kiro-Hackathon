@@ -82,7 +82,7 @@ This MVP is a stepping stone. Future plans for PeerPilot include:
 
 ## Contact
 
-[Your Name/Team Name]
-[Your Email (Optional)]
+Gerlyn Eduardo Duarte
+gerlyn@ula.ve
 
 ---
