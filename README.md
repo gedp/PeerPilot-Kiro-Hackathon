@@ -55,8 +55,86 @@ PeerPilot leverages the following AWS services, orchestrated and integrated with
     cd PeerPilot-Kiro-Hackathon
     ```
 2.  **AWS Configuration:**
-    * Ensure your AWS credentials are configured (e.g., via `~/.aws/credentials` or environment variables) with access to S3, Textract, and Bedrock.
-    * Kiro will guide you through creating the `peerpilot-kiro-data` S3 bucket if it doesn't exist.
+    ---
+    ### AWS Setup Guide for PeerPilot
+
+    Here are the steps to configure the integration with AWS S3:
+
+    #### 1. AWS Credentials Setup
+    You have a few options for AWS credentials:
+    **Option A: Environment Variables (Recommended for development)**
+    ```bash
+    # Edit your .env file with your actual AWS credentials
+    # You can get these from AWS IAM console
+    ```
+    **Option B: AWS CLI Configuration**
+    ```bash
+    # Install AWS CLI if you haven't already
+    pip install awscli
+    # Configure your credentials
+    aws configure
+    ```
+    **Option C: IAM Roles (For production/EC2)**
+    If running on EC2, you can use IAM roles instead of hardcoded credentials.
+
+    #### 2. Get Your AWS Credentials
+    Go to [AWS IAM Console](https://console.aws.amazon.com/iam/home#/users)
+    * Click "Users" → "Create User"
+    * Give it a name like `peerpilot-s3-user`
+    * Attach the policy `AmazonS3FullAccess` (or create a custom policy for just your bucket)
+    * Go to "Security credentials" tab → "Create access key"
+    * Choose "Application running outside AWS"
+    * Copy the Access Key ID and Secret Access Key
+
+    #### 3. Update Your Environment
+    Edit your `.env` file with your actual credentials:
+    ```
+    AWS_ACCESS_KEY_ID=AKIA...your_actual_key
+    AWS_SECRET_ACCESS_KEY=your_actual_secret_key
+    AWS_DEFAULT_REGION=us-east-1
+    S3_BUCKET_NAME=peerpilot-kiro-data
+    ```
+
+    #### 4. Install Dependencies
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+    #### 5. Test Your Setup
+    ```bash
+    python test_s3_setup.py
+    ```
+    This will:
+    * Create the `peerpilot-kiro-data` bucket if it doesn't exist
+    * Test upload, download, list, and delete operations
+    * Clean up test files
+
+    #### 6. S3 Bucket Structure
+    Your bucket will be organized like this:
+    ```
+    peerpilot-kiro-data/
+    ├── articulos-entrada/     # Incoming PDF articles
+    ├── normas-revistas/       # Journal guidelines (YAML/JSON)
+    ├── revisores-basico/      # Reviewer profiles (CSV/JSON)
+    └── resultados-revisiones/ # Generated reports
+    ```
+
+    #### 7. Security Best Practices
+    * Never commit your `.env` file to git (it's already in `.gitignore`)
+    * Use IAM policies with minimal required permissions
+    * Consider using AWS IAM roles for production deployments
+    * Rotate your access keys regularly
+
+    Your S3 client is already configured with all the methods you'll need:
+    * `upload_file()` - Upload PDFs and data files
+    * `download_file()` - Retrieve files for processing
+    * `list_files()` - Browse bucket contents
+    * `delete_file()` - Clean up temporary files
+    * `create_bucket_if_not_exists()` - Automatic bucket setup
+
+    Once you've updated your `.env` file with real AWS credentials, run the test script to verify everything works. The bucket will be created automatically on first use!
+    ---
+
 3.  **Install Kiro and Dependencies:**
     ```bash
     pip install kiro-sdk # and any other dependencies Kiro suggests
@@ -86,3 +164,20 @@ Gerlyn Eduardo Duarte
 gerlyn@ula.ve
 
 ---
+
+### Git Troubleshooting History
+
+During the initial setup and development, we encountered and resolved the following common issues related to Git and security:
+
+-   **Issue: "Cannot push references to remote, run a pull" (No se puede enviar referencias al remoto, ejecutar un pull):**
+    -   **Cause:** Conflict in the commit history with the remote repository.
+    -   **Resolution:** Resolved by executing `git pull origin main` to synchronize changes before pushing.
+
+-   **Issue: "Push cannot contain secrets" (GitHub Push Protection):**
+    -   **Cause:** The `.env.example` file was accidentally included in Git history containing secret patterns (even with placeholders), which was detected by GitHub's push protection in an earlier commit.
+    -   **Resolution:**
+        1.  The content of `.env.example` was verified and cleaned to ensure it only contained generic placeholders.
+        2.  `.env.example` was added to the `.gitignore` file to prevent Git from tracking this file in the future.
+        3.  Git history was rewritten using the command `git filter-branch --force --index-filter "git rm --cached --ignore-unmatch .env.example" --prune-empty --tag-name-filter cat -- --all` to permanently remove all instances of the `.env.example` file that might have contained secrets from **all past commits**.
+        4.  Finally, the remote repository was force-updated by executing `git push --force origin main` to overwrite the old history with the new, clean history.
+    -   **Importance:** This is a fundamental security practice to prevent accidental exposure of credentials and other sensitive data in public repositories.
