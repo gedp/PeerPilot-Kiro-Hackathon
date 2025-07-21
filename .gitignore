@@ -1,4 +1,25 @@
-# Python
+# Dependencias de Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json # Puede ser opcional, mira la nota abajo
+
+# Archivos de Serverless
+.serverless/
+.webpack/           # Común si usas serverless-webpack
+.build/             # Otro posible directorio de build de Serverless
+.serverless-offline/ # Si usas serverless-offline
+
+# Entornos virtuales de Python
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Archivos de caché y compilación de Python
 __pycache__/
 *.pyc
 *.pyo
@@ -13,49 +34,46 @@ parts/
 sdist/
 var/
 *.egg
+
+# Archivos de configuración de entorno (variables locales)
 .env
-.env.example
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
+.env.example # A menudo se mantiene para mostrar el formato, pero si contiene secretos, ignóralo.
 
-# Kiro specific (if Kiro generates specific temporary folders or config files)
-.kiro/           # Kiro's internal configuration folder
-kiro_temp/       # Any temporary directories Kiro might create
-*.kiro_config    # Example if Kiro generates local config files
+# Específico de Kiro (si Kiro genera carpetas temporales o de configuración)
+.kiro/              # Carpeta de configuración interna de Kiro (ejemplo)
+kiro_temp/          # Directorios temporales que Kiro podría crear
+*.kiro_config       # Ejemplo de archivos de configuración local de Kiro
 
-# AWS specific
-.aws/            # Contains AWS credentials (important!)
-*.pem            # Private key files
-*.key            # Other key files
-# If Kiro generates any temporary AWS credential files or logs
-aws-exports.js   # Amplify config if Kiro uses it (less likely for this project)
+# Específico de AWS
+.aws/               # ¡Contiene credenciales de AWS, muy importante ignorar!
+*.pem               # Archivos de clave privada
+*.key               # Otros archivos de clave
+aws-exports.js      # Configuración de Amplify (si se usa)
+# Archivos temporales de credenciales o logs de AWS si Kiro los generara
 
-# Editor and IDE specific
-.idea/           # JetBrains IDEs (PyCharm, IntelliJ)
-.vscode/         # VS Code settings (optional, sometimes useful to share)
+# Archivos de Editor e IDE
+.idea/              # IDEs de JetBrains (PyCharm, IntelliJ)
+.vscode/            # Configuración de VS Code (opcional, a veces útil para compartir ajustes de equipo)
 *.sublime-project
 *.sublime-workspace
 
-# OS generated files
-.DS_Store        # macOS
-.Trashes         # macOS
-Thumbs.db        # Windows
-ehthumbs.db      # Windows
-*.log            # Log files
-*.sqlite3        # SQLite databases (if used locally)
-*.db             # Other database files
+# Archivos generados por el sistema operativo
+.DS_Store           # macOS
+.Trashes            # macOS
+Thumbs.db           # Windows
+ehthumbs.db         # Windows
 
-# Local data / Generated outputs
-data/            # If we process large local data files that shouldn't be committed
-results/         # For local test results, output files that are not part of the source code
-temp/            # Temporary files
+# Logs y bases de datos locales
+*.log               # Archivos de log
+*.sqlite3           # Bases de datos SQLite (si se usan localmente)
+*.db                # Otros archivos de base de datos
 
-# Example of files that might be generated in our S3 flow (but are not part of source)
-# If Kiro creates local copies of these, they should be ignored
-# articles-input/   # NO - these are in S3, if they are downloaded locally for processing, then yes.
-# journal_rules.yaml # NO - this is source data
-# reviewers_example.csv # NO - this is source data
+# Datos locales / Salidas generadas
+data/               # Si procesas archivos de datos locales grandes que no deben ser versionados
+results/            # Para resultados de pruebas locales, archivos de salida no parte del código fuente
+temp/               # Archivos temporales
+uploads/            # Si tu aplicación maneja subidas de archivos localmente
+
+# Archivos de despliegue y empaquetado
+*.zip
+*.tar.gz

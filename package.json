@@ -1,0 +1,23 @@
+{
+  "name": "peerpilot-kiro-hackathon",
+  "version": "1.0.0",
+  "description": "## Project Overview",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gedp/PeerPilot-Kiro-Hackathon.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gedp/PeerPilot-Kiro-Hackathon/issues"
+  },
+  "homepage": "https://github.com/gedp/PeerPilot-Kiro-Hackathon#readme",
+  "dependencies": {
+    "serverless-python-requirements": "^6.1.2"
+  }
+}

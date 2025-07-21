@@ -1,0 +1,55 @@
+service: peerpilot-document-processor
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  
+  environment:
+    S3_BUCKET_NAME: ${env:S3_BUCKET_NAME, 'peerpilot-kiro-data'}
+    AWS_DEFAULT_REGION: ${env:AWS_DEFAULT_REGION, 'us-east-1'}
+  
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - s3:GetObject
+        - s3:PutObject
+        - s3:DeleteObject
+        - s3:ListBucket
+      Resource:
+        - "arn:aws:s3:::${env:S3_BUCKET_NAME, 'peerpilot-kiro-data'}"
+        - "arn:aws:s3:::${env:S3_BUCKET_NAME, 'peerpilot-kiro-data'}/*"
+    - Effect: Allow
+      Action:
+        - textract:StartDocumentTextDetection
+        - textract:GetDocumentTextDetection
+        - textract:DetectDocumentText
+      Resource: "*"
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+      Resource: "*"
+
+functions:
+  processDocument:
+    handler: lambda_function.lambda_handler
+    timeout: 300  # 5 minutes
+    memorySize: 512
+    events:
+      - s3:
+          bucket: ${env:S3_BUCKET_NAME, 'peerpilot-kiro-data'}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: articulos-entrada/
+            - suffix: .pdf
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    slim: true
