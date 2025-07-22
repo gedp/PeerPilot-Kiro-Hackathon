@@ -8,7 +8,7 @@ provider:
   
   environment:
     S3_BUCKET_NAME: ${env:S3_BUCKET_NAME, 'peerpilot-kiro-data'}
-    AWS_DEFAULT_REGION: ${env:AWS_DEFAULT_REGION, 'us-east-1'}
+    # AWS_DEFAULT_REGION: se ha eliminado porque es una clave reservada de Lambda.
   
   iamRoleStatements:
     - Effect: Allow
@@ -41,6 +41,7 @@ functions:
     events:
       - s3:
           bucket: ${env:S3_BUCKET_NAME, 'peerpilot-kiro-data'}
+          existing: true # Indica a Serverless que use un bucket S3 existente
           event: s3:ObjectCreated:*
           rules:
             - prefix: articulos-entrada/
