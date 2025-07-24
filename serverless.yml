@@ -3,30 +3,33 @@ service: peerpilot-document-processor
 
 provider:
   name: aws
-  runtime: python3.9
+  runtime: python3.12
   region: us-east-1
   stage: ${opt:stage, 'dev'}
   
   environment:
     S3_BUCKET_NAME: peerpilot-kiro-data
+    AWS_DEFAULT_REGION: us-east-1
   
   iamRoleStatements:
     - Effect: Allow
       Action:
         - s3:GetObject
+        - s3:GetObjectVersion
       Resource:
-        - "arn:aws:s3:::peerpilot-kiro-data/input-articles/*"
+        - "arn:aws:s3:::peerpilot-kiro-data/*"
     - Effect: Allow
       Action:
         - s3:PutObject
+        - s3:PutObjectAcl
         - s3:DeleteObject
       Resource:
-        - "arn:aws:s3:::peerpilot-kiro-data/processed-articles/*"
-        - "arn:aws:s3:::peerpilot-kiro-data/journal-norms/*"
-        - "arn:aws:s3:::peerpilot-kiro-data/review-results/*"
+        - "arn:aws:s3:::peerpilot-kiro-data/*"
     - Effect: Allow
       Action:
         - s3:ListBucket
+        - s3:GetBucketLocation
+        - s3:CreateBucket
       Resource:
         - "arn:aws:s3:::peerpilot-kiro-data"
     - Effect: Allow

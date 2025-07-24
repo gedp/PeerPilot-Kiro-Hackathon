@@ -1,107 +1,57 @@
 #!/bin/bash
 
-# PeerPilot Serverless Deployment Script
-# This script deploys the automated PDF processing pipeline to AWS Lambda
+# Deployment script for PeerPilot Document Processor
+# This script deploys the serverless application to AWS
 
 set -e  # Exit on any error
 
-echo "🚀 PeerPilot Serverless Deployment"
-echo "=================================="
+echo "🚀 Starting deployment of PeerPilot Document Processor..."
+echo "=================================================="
 
-# Check if .env file exists
-if [ ! -f ".env" ]; then
-    echo "❌ Error: .env file not found!"
-    echo "   Please create .env file with your AWS credentials"
-    echo "   Copy from .env.example and update with your values"
-    exit 1
-fi
-
-# Load environment variables
-export $(cat .env | grep -v '^#' | xargs)
-
-# Check required environment variables
-if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
-    echo "❌ Error: AWS credentials not found in .env file"
-    echo "   Please set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY"
-    exit 1
-fi
-
-echo "✅ Environment variables loaded"
-echo "   Bucket: $S3_BUCKET_NAME"
-echo "   Region: $AWS_DEFAULT_REGION"
-
-# Check if serverless framework is installed
+# Check if serverless is installed
 if ! command -v serverless &> /dev/null; then
-    echo "📦 Installing Serverless Framework..."
-   sudo npm install -g serverless
+    echo "❌ Serverless Framework not found. Please install it first:"
+    echo "   npm install -g serverless"
+    exit 1
 fi
 
-# Check if serverless plugins are installed
-if [ ! -d "node_modules" ]; then
-    echo "📦 Installing Serverless plugins..."
-    npm init -y
-    npm install serverless-python-requirements
+# Check if AWS credentials are configured
+if ! aws sts get-caller-identity &> /dev/null; then
+    echo "❌ AWS credentials not configured. Please run 'aws configure' first."
+    exit 1
 fi
 
-# Create S3 bucket if it doesn't exist
-echo "📦 Creating S3 bucket if needed..."
-python3 -c "
-from src.s3_client import S3Client
-s3 = S3Client()
-if s3.create_bucket_if_not_exists():
-    print('✅ S3 bucket ready')
-else:
-    print('❌ Failed to create S3 bucket')
-    exit(1)
-"
+echo "✅ Prerequisites check passed"
+echo ""
 
-# Test local processing first
-echo "🧪 Testing local processing..."
-python3 -c "
-import sys
-from src.document_processor import DocumentProcessor
-from src.s3_client import S3Client
+# Clean up any previous builds
+echo "🧹 Cleaning up previous builds..."
+rm -rf .serverless
+echo "✅ Cleanup completed"
+echo ""
 
-try:
-    processor = DocumentProcessor()
-    s3_client = S3Client()
-    print('✅ Local components initialized successfully')
-except Exception as e:
-    print(f'❌ Local test failed: {e}')
-    sys.exit(1)
-"
+# Deploy the service
+echo "📦 Deploying serverless application..."
+echo "   Runtime: Python 3.12"
+echo "   Bucket: peerpilot-kiro-data"
+echo "   Region: us-east-1"
+echo ""
 
-# Deploy to AWS Lambda
-echo "🚀 Deploying to AWS Lambda..."
 serverless deploy --verbose
 
-if [ $? -eq 0 ]; then
-    echo ""
-    echo "🎉 Deployment Successful!"
-    echo "========================"
-    echo ""
-    echo "Your automated PDF processing pipeline is now active!"
-    echo ""
-    echo "📋 What happens next:"
-    echo "   1. Upload PDF files to: s3://$S3_BUCKET_NAME/articulos-entrada/"
-    echo "   2. Lambda function will automatically trigger"
-    echo "   3. Textract will extract text from PDFs"
-    echo "   4. Results saved to: s3://$S3_BUCKET_NAME/processed-articles/"
-    echo ""
-    echo "🧪 Test the pipeline:"
-    echo "   python3 monitor_processing.py"
-    echo ""
-    echo "📊 Monitor Lambda logs:"
-    echo "   serverless logs -f processDocument -t"
-    echo ""
-    echo "🗑️ To remove deployment:"
-    echo "   serverless remove"
-else
-    echo "❌ Deployment failed!"
-    echo "   Check the error messages above"
-    echo "   Common issues:"
-    echo "   - AWS credentials not properly configured"
-    echo "   - Insufficient IAM permissions"
-    echo "   - S3 bucket name conflicts"
-    exit 1
-fi
+echo ""
+echo "🎉 Deployment completed successfully!"
+echo "=================================================="
+echo ""
+echo "📋 Deployment Summary:"
+echo "   Service: peerpilot-document-processor"
+echo "   Runtime: python3.12"
+echo "   S3 Bucket: peerpilot-kiro-data"
+echo "   Region: us-east-1"
+echo ""
+echo "🔧 Next steps:"
+echo "   1. Test S3 integration: python test_s3_integration.py"
+echo "   2. Upload files to: s3://peerpilot-kiro-data/input-articles/"
+echo "   3. Monitor logs: serverless logs -f processDocument -t"
+echo ""
+echo "✅ Ready to process documents!"

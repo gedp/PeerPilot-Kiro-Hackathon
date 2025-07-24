@@ -3,6 +3,9 @@ import boto3
 from botocore.exceptions import ClientError, NoCredentialsError
 from dotenv import load_dotenv
 import logging
+from typing import List, Optional, Dict, Any
+import mimetypes
+from pathlib import Path
 
 # Load environment variables
 load_dotenv()
@@ -10,18 +13,33 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 class S3Client:
-    def __init__(self):
-        self.bucket_name = os.getenv('S3_BUCKET_NAME', 'peerpilot-kiro-data')
-        self.region = os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
+    def __init__(self, bucket_name: Optional[str] = None, region: Optional[str] = None):
+        """
+        Initialize S3 client with bucket configuration
+        
+        Args:
+            bucket_name: S3 bucket name (defaults to env var or 'peerpilot-kiro-data')
+            region: AWS region (defaults to env var or 'us-east-1')
+        """
+        self.bucket_name = bucket_name or os.getenv('S3_BUCKET_NAME', 'peerpilot-kiro-data')
+        self.region = region or os.getenv('AWS_DEFAULT_REGION', 'us-east-1')
         
         try:
-            self.s3_client = boto3.client('s3')
-            self.s3_resource = boto3.resource('s3')
+            self.s3_client = boto3.client('s3', region_name=self.region)
+            self.s3_resource = boto3.resource('s3', region_name=self.region)
+            logger.info(f"S3 client initialized for bucket: {self.bucket_name} in region: {self.region}")
         except NoCredentialsError:
             raise Exception("AWS credentials not found. Please configure your credentials.")
+        except Exception as e:
+            raise Exception(f"Failed to initialize S3 client: {str(e)}")
     
-    def create_bucket_if_not_exists(self):
-        """Create S3 bucket if it doesn't exist"""
+    def create_bucket_if_not_exists(self) -> bool:
+        """
+        Create S3 bucket if it doesn't exist with proper security settings
+        
+        Returns:
+            bool: True if bucket exists or was created successfully
+        """
         try:
             # Check if bucket exists
             self.s3_client.head_bucket(Bucket=self.bucket_name)
@@ -39,7 +57,10 @@ class S3Client:
                             Bucket=self.bucket_name,
                             CreateBucketConfiguration={'LocationConstraint': self.region}
                         )
-                    logger.info(f"Created bucket {self.bucket_name}")
+                    
+                    # Apply security settings
+                    self._apply_bucket_security()
+                    logger.info(f"Created bucket {self.bucket_name} with security settings")
                     return True
                 except ClientError as create_error:
                     logger.error(f"Failed to create bucket: {create_error}")
@@ -47,6 +68,23 @@ class S3Client:
             else:
                 logger.error(f"Error checking bucket: {e}")
                 return False
+    
+    def _apply_bucket_security(self):
+        """Apply security settings to the bucket"""
+        try:
+            # Block public access
+            self.s3_client.put_public_access_block(
+                Bucket=self.bucket_name,
+                PublicAccessBlockConfiguration={
+                    'BlockPublicAcls': True,
+                    'IgnorePublicAcls': True,
+                    'BlockPublicPolicy': True,
+                    'RestrictPublicBuckets': True
+                }
+            )
+            logger.info(f"Applied public access block to {self.bucket_name}")
+        except ClientError as e:
+            logger.warning(f"Failed to apply public access block: {e}")
     
     def upload_file(self, local_file_path, s3_key=None):
         """Upload a file to S3"""
