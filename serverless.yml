@@ -36,7 +36,10 @@ provider:
       Action:
         - textract:StartDocumentTextDetection
         - textract:GetDocumentTextDetection
+        - textract:DetectDocumentText
         - textract:AnalyzeDocument
+        - textract:StartDocumentAnalysis
+        - textract:GetDocumentAnalysis
       Resource: "*"
     - Effect: Allow
       Action:
@@ -48,8 +51,12 @@ provider:
 functions:
   processDocument:
     handler: lambda_function.lambda_handler
-    timeout: 300
-    memorySize: 512
+    timeout: 900  # 15 minutes for large document processing
+    memorySize: 1024  # Increased memory for better performance
+    environment:
+      TEXTRACT_MAX_WAIT_TIME: 600
+      SYNC_EXTRACTION_SIZE_LIMIT: 5
+      MIN_CONFIDENCE_THRESHOLD: 80
     events:
       - s3:
           bucket: peerpilot-kiro-data
@@ -57,6 +64,7 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - prefix: input-articles/
+            - suffix: .pdf
 
 resources:
   Resources:
