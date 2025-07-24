@@ -32,7 +32,25 @@ def lambda_handler(event, context) -> Dict[str, Any]:
     
     try:
         logger.info(f"Lambda function started at {start_time.isoformat()}")
-        logger.info(f"Processing {len(event.get('Records', []))} S3 event records")
+        logger.info(f"Event received: {json.dumps(event, indent=2)}")
+        
+        # Validate event structure
+        if not event or 'Records' not in event:
+            logger.warning("Invalid event structure - no Records found")
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'Invalid event structure - no Records found'})
+            }
+        
+        records = event.get('Records', [])
+        logger.info(f"Processing {len(records)} S3 event records")
+        
+        if not records:
+            logger.info("No records to process")
+            return {
+                'statusCode': 200,
+                'body': json.dumps({'message': 'No records to process'})
+            }
         
         # Initialize document processor
         processor = DocumentProcessor()
@@ -135,19 +153,25 @@ def _should_process_file(file_key: str) -> bool:
     Returns:
         True if file should be processed
     """
+    logger.info(f"Evaluating file for processing: {file_key}")
+    
     # Check if file is in the correct input folder
     if not file_key.startswith('input-articles/'):
+        logger.info(f"Skipping {file_key}: not in input-articles/ folder")
         return False
     
     # Check if file is a PDF
     if not file_key.lower().endswith('.pdf'):
+        logger.info(f"Skipping {file_key}: not a PDF file (extension: {file_key.split('.')[-1] if '.' in file_key else 'none'})")
         return False
     
     # Skip hidden files or system files
     filename = file_key.split('/')[-1]
     if filename.startswith('.') or filename.startswith('_'):
+        logger.info(f"Skipping {file_key}: hidden or system file")
         return False
     
+    logger.info(f"✅ File {file_key} approved for processing")
     return True
 
 def _serialize_processing_result(result: ProcessingResult) -> Dict[str, Any]:

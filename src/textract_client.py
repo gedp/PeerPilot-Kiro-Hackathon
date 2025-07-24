@@ -169,13 +169,28 @@ class TextractClient:
             )
             
         except ClientError as e:
-            if e.response['Error']['Code'] == 'NoSuchKey':
+            error_code = e.response.get('Error', {}).get('Code', '')
+            http_status = e.response.get('ResponseMetadata', {}).get('HTTPStatusCode', 0)
+            
+            # Handle 404 Not Found errors (can be NoSuchKey, NoSuchBucket, or HTTP 404)
+            if error_code in ['NoSuchKey', 'NoSuchBucket', '404'] or http_status == 404:
                 return ValidationResult(
                     is_valid=False,
                     file_size=0,
                     file_format="unknown",
                     error_message=f"Document not found: {document_key}"
                 )
+            
+            # Handle access denied errors
+            if error_code in ['AccessDenied', 'Forbidden'] or http_status == 403:
+                return ValidationResult(
+                    is_valid=False,
+                    file_size=0,
+                    file_format="unknown",
+                    error_message=f"Access denied to document: {document_key}"
+                )
+            
+            # For other errors, re-raise to be handled by calling code
             raise
     
     def _should_use_async_extraction(self, bucket_name: str, document_key: str, file_size: int) -> bool:

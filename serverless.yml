@@ -9,7 +9,6 @@ provider:
   
   environment:
     S3_BUCKET_NAME: peerpilot-kiro-data
-    AWS_DEFAULT_REGION: us-east-1
   
   iamRoleStatements:
     - Effect: Allow
@@ -66,17 +65,7 @@ functions:
             - prefix: input-articles/
             - suffix: .pdf
 
-resources:
-  Resources:
-    S3Bucket:
-      Type: AWS::S3::Bucket
-      Properties:
-        BucketName: peerpilot-kiro-data
-        PublicAccessBlockConfiguration:
-          BlockPublicAcls: true
-          BlockPublicPolicy: true
-          IgnorePublicAcls: true
-          RestrictPublicBuckets: true
+# Resources section removed since we're using existing S3 bucket
 
 plugins:
   - serverless-python-requirements
